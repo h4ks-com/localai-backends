@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10
       - uses: j178/prek-action@v3
+      - name: image tags end with the backend version
+        run: yq -o=json index.yaml | jq -e 'all(.[]; .version as $v | .uri | endswith("-" + $v))'
 
   plan:
     if: github.event_name != 'pull_request'

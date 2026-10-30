@@ -14,8 +14,9 @@ local-ai backends install h4ks@ltx2
 ## Add or update a backend
 
 1. Put the backend in `backends/<name>/`, laid out like LocalAI's own Python backends (`backend.py`, `install.sh`, `run.sh`, requirements files).
-2. Add its entry to `index.yaml`, or bump the version at the end of its image tag.
+2. Add its entry to `index.yaml`, or bump its `version` and the matching end of its image tag.
 3. Push to `main`. CI builds every image in `index.yaml` that ghcr does not have yet.
+4. `local-ai backends upgrade <name>` installs the new version wherever the gallery is configured.
 
 ## Develop
 
