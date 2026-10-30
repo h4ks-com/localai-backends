@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
-      - uses: j178/prek-action@v3
+      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: j178/prek-action@v3.1.0
       - name: image tags end with the backend version
         run: yq -o=json index.yaml | jq -e 'all(.[]; .version as $v | .uri | endswith("-" + $v))'
 
