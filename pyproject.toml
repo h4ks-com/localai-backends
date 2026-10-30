@@ -17,20 +17,12 @@ package = false
 
 [tool.ruff]
 line-length = 120
-target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4", "C90", "PIE", "RET", "RUF", "PL"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
-
-[tool.ruff.lint.pep8-naming]
-# LocalAI's gRPC service names its methods in PascalCase.
-extend-ignore-names = ["Health", "LoadModel", "GenerateVideo", "Free"]
-
-[tool.ty.environment]
-python-version = "3.11"
 
 # Each backend's heavy dependencies and LocalAI's generated gRPC modules exist only inside the image build.
 [tool.ty.analysis]
@@ -44,7 +36,7 @@ replace-imports-with-any = [
     "transformers",
     "diffusers",
     "diffusers.**",
-    "PIL",
+    "python_utils",
 ]
 
 [tool.vulture]

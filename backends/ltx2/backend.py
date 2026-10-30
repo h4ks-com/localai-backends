@@ -1,27 +1,14 @@
 """LocalAI backend for LTX-2.5 distilled image to video, with an optional two-stage x2 latent upscale.
 
-The model config points `model` at a transformer GGUF and the `diffusers_dir` option at a local copy of
-Lightricks/LTX-2.5-Diffusers, which provides every other component:
-
-    name: ltx-2.5
-    backend: ltx2
-    known_usecases: [video]
-    parameters:
-      model: ltx-2.5-22b-distilled-UD-Q5_K_XL.gguf
-    options:
-      - diffusers_dir:ltx-2.5-diffusers
-
-POST /video takes prompt, start_image (the first frame), width, height (multiples of 64 for two stages),
-num_frames (8k+1), fps, seed and params[stages]: 2 by default (half size, then the x2 latent upscaler and a
-short pass at full size), 1 renders at full size directly. The distilled model runs a fixed sigma schedule
-without guidance, so step and cfg_scale are ignored.
+The model config sets `model` to a transformer GGUF and the `diffusers_dir` option to a local copy of
+Lightricks/LTX-2.5-Diffusers. Requests set `params[stages]` to 2 (default: half size, x2 latent upscale, then a
+short pass at full size; width and height must be multiples of 64) or 1 (full size directly). The distilled model
+runs a fixed sigma schedule without guidance, so step and cfg_scale have no effect.
 """
 
 import argparse
-import base64
 import ctypes
 import gc
-import io
 import os
 import signal
 import sys
@@ -41,17 +28,18 @@ from diffusers import (
 from diffusers.loaders.single_file_model import SINGLE_FILE_LOADABLE_CLASSES
 from diffusers.pipelines.ltx2.latent_upsampler import LTX2LatentUpsamplerModel
 from diffusers.pipelines.ltx2.utils import DISTILLED_SIGMA_VALUES, STAGE_2_DISTILLED_SIGMA_VALUES
-from diffusers.utils import encode_video
-from PIL import Image
+from diffusers.utils import encode_video, load_image
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 from grpc_auth import get_auth_interceptors
+from python_utils import parse_options
 
+DEFAULT_FPS = 24
 LIBC = ctypes.CDLL("libc.so.6")
 LTX2_SINGLE_FILE = SINGLE_FILE_LOADABLE_CLASSES["LTX2VideoTransformer3DModel"]
 CONVERT_LTX2 = LTX2_SINGLE_FILE["checkpoint_mapping_fn"]
-# GGUF files keep LTX-2.5's original names for the prompt modulation MLPs, which diffusers' converter
-# does not map yet; without the rename those layers stay empty and loading fails.
+# GGUF files keep LTX-2.5's original names for the prompt modulation MLPs, so we rename them to the names
+# diffusers loads, or those layers stay empty.
 PROMPT_ADALN_RENAMES = (
     ("audio_prompt_adaln_single.", "audio_prompt_adaln."),
     ("prompt_adaln_single.", "prompt_adaln."),
@@ -71,20 +59,8 @@ def convert_ltx25(checkpoint, **kwargs):
 LTX2_SINGLE_FILE["checkpoint_mapping_fn"] = convert_ltx25
 
 
-def option_values(options) -> dict[str, str]:
-    return dict(option.split(":", 1) for option in options if ":" in option)
-
-
-def load_image(image: str) -> Image.Image:
-    """LocalAI hands images over as a file path, a data URI or bare base64."""
-    if os.path.isfile(image):
-        return Image.open(image).convert("RGB")
-    return Image.open(io.BytesIO(base64.b64decode(image.split(",", 1)[-1]))).convert("RGB")
-
-
 def release_cached_memory() -> None:
-    """Offloading moves weights between the card and pinned RAM on every clip, and PyTorch keeps the pinned
-    buffers it used; we hand them back so the process does not grow by gigabytes per clip."""
+    """We hand back the pinned buffers PyTorch keeps from offloading, so the process stays flat across clips."""
     gc.collect()
     torch.cuda.empty_cache()
     torch._C._host_emptyCache()
@@ -121,7 +97,7 @@ class Pipelines:
             duration_head=None,
             torch_dtype=torch.bfloat16,
         )
-        # The whole pipeline does not fit on a 24 GB card at once, so each part moves there while it runs.
+        # The whole pipeline needs more than 24 GB, so we move each part onto the card only while it runs.
         self.video.enable_model_cpu_offload()
         self.video.vae.enable_tiling()
         upsampler = LTX2LatentUpsamplerModel.from_pretrained(
@@ -129,14 +105,14 @@ class Pipelines:
         )
         self.upsample = LTX2LatentUpsamplePipeline(vae=self.video.vae, latent_upsampler=upsampler.to("cuda"))
 
-    def generate(self, request) -> tuple:
+    def generate(self, request, fps: int) -> tuple:
         params = dict(request.params)
         frames = valid_frame_count(request.num_frames or 121)
         width, height = request.width or 576, request.height or 1024
         shared = {
             "image": load_image(request.start_image),
             "prompt": request.prompt,
-            "frame_rate": float(request.fps or 24),
+            "frame_rate": float(fps),
             "guidance_scale": 1.0,
             "audio_guidance_scale": 1.0,
             "stg_scale": 0.0,
@@ -185,7 +161,7 @@ class BackendServicer(backend_pb2_grpc.BackendServicer):
 
     def LoadModel(self, request, context):
         transformer_path = request.ModelFile or os.path.join(request.ModelPath, request.Model)
-        diffusers_dir = os.path.join(request.ModelPath, option_values(request.Options).get("diffusers_dir", ""))
+        diffusers_dir = os.path.join(request.ModelPath, str(parse_options(request.Options).get("diffusers_dir", "")))
         try:
             self.pipelines = Pipelines(transformer_path, diffusers_dir)
         except (OSError, ValueError, RuntimeError) as error:
@@ -197,10 +173,11 @@ class BackendServicer(backend_pb2_grpc.BackendServicer):
             context.abort(grpc.StatusCode.FAILED_PRECONDITION, "LTX-2.5 is not loaded")
         if not request.start_image:
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, "send the first frame as start_image")
-        video, audio = self.pipelines.generate(request)
+        fps = request.fps or DEFAULT_FPS
+        video, audio = self.pipelines.generate(request, fps)
         encode_video(
             video[0],
-            fps=request.fps or 24,
+            fps=fps,
             output_path=request.dst,
             audio=audio[0].float().cpu(),
             audio_sample_rate=self.pipelines.video.vocoder.config.output_sampling_rate,
@@ -211,7 +188,7 @@ class BackendServicer(backend_pb2_grpc.BackendServicer):
 
     def Free(self, request, context):
         self.pipelines = None
-        torch.cuda.empty_cache()
+        release_cached_memory()
         return backend_pb2.Result(success=True)
 
 
