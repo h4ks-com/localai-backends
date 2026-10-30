@@ -13,7 +13,7 @@ local-ai backends install ltx2
 local-ai models install h4ks@ltx-2.5
 ```
 
-Model entries pin every weight file by revision and sha256, so LocalAI skips the files already on disk.
+Model entries pin their weight files by revision and sha256, so LocalAI skips the files already on disk.
 
 ## Add or update a backend
 

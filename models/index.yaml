@@ -86,7 +86,7 @@
     uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/tokenizer_config.json
     sha256: d6423dae508cc3a129d22ea443841c111832a1a73125b8f25ea8736951698bcb
 - name: noobai-xl
-  description: "NoobAI-XL 1.1 anime text to image with the fp16-fix SDXL VAE."
+  description: "NoobAI-XL 1.1 (eps), an uncensored SDXL anime model, for text to image. Prompt with Danbooru tags; the model card suggests CFG 5-6, 25-30 steps and about 1024x1024 total area."
   config_file:
     name: noobai-xl
     backend: stablediffusion-ggml
@@ -105,7 +105,7 @@
     uri: https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/resolve/207b116dae70ace3637169f1ddd2434b91b3a8cd/sdxl_vae.safetensors
     sha256: 235745af8d86bf4a4c1b5b4f529868b37019a10f7c0b2e79ad0abca3a22bc6e1
 - name: noobai-xl-img2img
-  description: "NoobAI-XL 1.1 image to image on diffusers."
+  description: "NoobAI-XL 1.1 image to image on diffusers at strength 0.45, so the source image survives."
   config_file:
     name: noobai-xl-img2img
     backend: diffusers
@@ -178,10 +178,10 @@
     uri: https://huggingface.co/Eugeoter/noob-sdxl-controlnet-lineart_anime/resolve/61ed2d40710b32a5a1c9873f7dec89ff0af9f2a4/diffusion_pytorch_model.safetensors
     sha256: 683fc8d042381751ca3ea6486e4ec1df30771d3c20f599598b9d030779c65337
   - filename: noobai-xl/diffusers/model_index.json
-    uri: https://raw.githubusercontent.com/h4ks-com/localai-backends/main/models/files/noobai-xl/model_index.json
+    uri: https://raw.githubusercontent.com/h4ks-com/localai-backends/ca23da1313be1d608658ead3d29e12d772ddda1c/models/files/noobai-xl/model_index.json
     sha256: 175ba7a912754c4c4cc75e84aef77a2c05a62cedf7823f9818a4a3514799bc01
 - name: noobai-xl-colorize
-  description: "NoobAI-XL 1.1 with the anime lineart ControlNet, which colors a sketch."
+  description: "NoobAI-XL 1.1 with a lineart ControlNet: send a drawing as the source image and describe the colours in the prompt. Its model_index.json lists the ControlNet, because LocalAI loads the pipeline from that folder alone."
   config_file:
     name: noobai-xl-colorize
     backend: diffusers
@@ -197,7 +197,7 @@
       model: noobai-xl/diffusers
   files: *noobai-diffusers
 - name: qwen-image-2.1
-  description: "Qwen-Image 2.1 text to image."
+  description: "Qwen-Image 2.1 for text to image and instruction edits (pass the picture as a reference image and say what to change), with the official Qwen3-VL-8B text encoder."
   config_file:
     name: qwen-image-2.1
     backend: stablediffusion-ggml
@@ -225,7 +225,7 @@
     uri: https://huggingface.co/unsloth/Qwen3-VL-8B-Instruct-GGUF/resolve/b93a7ee713758252c555be4210c00540df954dc2/mmproj-F16.gguf
     sha256: d406d03ebabefdef86a2c86bf0c1b65f9e046f7a81c218f25de4931b46a07fc4
 - name: qwen-image-2.1-uncensored
-  description: "Qwen-Image 2.1 with the Heretic text encoder."
+  description: "Qwen-Image 2.1 with a heretic text encoder whose refusal direction was ablated."
   config_file:
     name: qwen-image-2.1-uncensored
     backend: stablediffusion-ggml
@@ -253,7 +253,7 @@
     uri: https://huggingface.co/pottokao/Qwen-Image-2.1-Text-Encoder-Heretic-GGUF/resolve/23813717f7f9282b372c23c7207468a7a168fa68/mmproj-qwen3vl_8b_heretic-f16.gguf
     sha256: 4649839491c8df1ebc9bed2de158ad2a45b53ed1d3b311d92a69056b6764f101
 - name: noct-q-anime
-  description: "The Noct-Q Anime fine-tune of Qwen-Image 2.1. Its weights come from Civitai, which needs an API token, so we download noct-q-anime/noctQAnime-v1-fp8.safetensors separately."
+  description: "Noct Q Anime, an uncensored anime fine-tune of Qwen-Image 2.1 with the heretic text encoder; start prompts with \"An anime illustration of\". Civitai serves its weights only to logged-in accounts, so download noct-q-anime/noctQAnime-v1-fp8.safetensors with an API token."
   config_file:
     name: noct-q-anime
     backend: stablediffusion-ggml
@@ -278,7 +278,7 @@
     uri: https://huggingface.co/pottokao/Qwen-Image-2.1-Text-Encoder-Heretic-GGUF/resolve/23813717f7f9282b372c23c7207468a7a168fa68/mmproj-qwen3vl_8b_heretic-f16.gguf
     sha256: 4649839491c8df1ebc9bed2de158ad2a45b53ed1d3b311d92a69056b6764f101
 - name: imajev-4b
-  description: "imajev 4B vision chat model."
+  description: "imajev 4B, a decision model that also reads images. Send the evidence, the question and lettered options to /v1/chat/completions, ask for one token with top_logprobs, and divide the letters' log-probabilities by the calibration temperature 1.305 before turning them into option probabilities."
   config_file:
     name: imajev-4b
     backend: llama-cpp
@@ -301,7 +301,7 @@
     uri: https://huggingface.co/mindchain/imajev-4b-GGUF/resolve/4b9045adf0c9913f02b802e9c555a8d772b8cf08/imajev-4b-mmproj-f16.gguf
     sha256: eb8fb4b4433115e7f92985b7aa74a47d3ce2d891d429367d08aa8405a894e4cc
 - name: ace-step-cover
-  description: "ACE-Step 1.5 turbo on /audio/transform, which covers or continues the uploaded song. It uses the weights of the localai@ace-step-turbo model."
+  description: "Covers and continuations on /audio/transform: audio=<song>, optional reference=<style song>, params[task] (cover re-sings the song; continue adds params[seconds] of music after its end), params[caption], params[lyrics], params[strength] (0-1, how closely a cover follows the source), params[language], params[seed]. Needs the weights of localai@ace-step-turbo."
   config_file:
     name: ace-step-cover
     backend: ace-step-cover
@@ -324,7 +324,7 @@
     parameters:
       model: acestep-v15-turbo
 - name: kimodo-soma-rp
-  description: "Kimodo text to motion on Vulkan, using the weights of the localai@kimodo-soma-rp model."
+  description: "Kimodo text to motion (POST /3d/animate) on Vulkan. Install localai@kimodo-soma-rp first for its weights; this entry replaces its config."
   config_file:
     name: kimodo-soma-rp
     backend: kimodocpp
