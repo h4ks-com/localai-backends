@@ -1,9 +1,27 @@
 - name: ltx2
-  version: "1"
-  uri: ghcr.io/h4ks-com/localai-backends:ltx2-cuda12-1
+  version: "2"
+  uri: ghcr.io/h4ks-com/localai-backends:ltx2-cuda12-2
   description: LTX-2.5 distilled image to video on PyTorch, with the two-stage x2 latent upscale.
   urls:
   - https://huggingface.co/Lightricks/LTX-2.5
   tags:
   - video-generation
+  - cuda
+- name: nitrogen
+  version: "1"
+  uri: ghcr.io/h4ks-com/localai-backends:nitrogen-cuda12-1
+  description: NVIDIA NitroGen, a game frame in and the next chunk of gamepad states out, served as chat completions.
+  urls:
+  - https://huggingface.co/nvidia/NitroGen
+  tags:
+  - game-agent
+  - cuda
+- name: ace-step-cover
+  version: "1"
+  uri: ghcr.io/h4ks-com/localai-backends:ace-step-cover-cuda12-1
+  description: LocalAI's ace-step backend plus /audio/transform, which covers or continues an uploaded song.
+  urls:
+  - https://github.com/ace-step/ACE-Step-1.5
+  tags:
+  - music-generation
   - cuda

@@ -1,0 +1,340 @@
+- name: ltx-2.5
+  description: "LTX-2.5 distilled image to video on the ltx2 backend. It also needs Lightricks/LTX-2.5-Diffusers, a gated repo, downloaded by hand into ltx-2.5-diffusers."
+  config_file:
+    name: ltx-2.5
+    backend: ltx2
+    known_usecases:
+      - video
+    parameters:
+      model: ltx-2.5-22b-distilled-UD-Q5_K_XL.gguf
+    options:
+      - diffusers_dir:ltx-2.5-diffusers
+  files:
+  - filename: ltx-2.5-22b-distilled-UD-Q5_K_XL.gguf
+    uri: https://huggingface.co/unsloth/LTX-2.5-GGUF/resolve/ac3c540c6025903784336e99b2dc179385c4c3b7/distilled/ltx-2.5-22b-distilled-UD-Q5_K_XL.gguf
+    sha256: 22a7f17cea349662b379c66380afa5ae4b81fadca63b7326c78f27b7185f3be2
+- name: nitrogen
+  description: "NVIDIA NitroGen (non-commercial license): send a game frame as the chat message image, get the next 16 gamepad states as JSON."
+  config_file:
+    name: nitrogen
+    backend: nitrogen
+    known_usecases:
+      - chat
+    parameters:
+      model: nitrogen/ng.pt
+    template:
+      use_tokenizer_template: true
+  files:
+  - filename: nitrogen/ng.pt
+    uri: https://huggingface.co/nvidia/NitroGen/resolve/584c8dded734d032f07a4bcc0ccb330e703298c4/ng.pt
+    sha256: a266f5fb9c7dbdcdf97216558d2d82075a9a994b824cda69afa9fd3280260a81
+  - filename: nitrogen/siglip-large-patch16-256/config.json
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/config.json
+    sha256: 1053d489ef9053689fc5ee3659c2212c6a44a6f0d71daeabb23a163a3150e57d
+  - filename: nitrogen/siglip-large-patch16-256/model.safetensors
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/model.safetensors
+    sha256: e00d04afb3fb45b0113e5c79b6d6889eff5f240e9c54cfb149dab4a3e304e9a3
+  - filename: nitrogen/siglip-large-patch16-256/preprocessor_config.json
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/preprocessor_config.json
+    sha256: e12b577bd0da1f9bf6a0b8d3d78c8f9b55b9d99dec25556954e19cfc7b8ecf28
+  - filename: nitrogen/siglip-large-patch16-256/special_tokens_map.json
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/special_tokens_map.json
+    sha256: 2b6a1ff67a27e0df9ac0c7d93250fc0d87431c7b366b3d5669217104f9088a26
+  - filename: nitrogen/siglip-large-patch16-256/spiece.model
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/spiece.model
+    sha256: 1e5036bed065526c3c212dfbe288752391797c4bb1a284aa18c9a0b23fcaf8ec
+  - filename: nitrogen/siglip-large-patch16-256/tokenizer.json
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/tokenizer.json
+    sha256: c6e405cb7c670d56636a9402c81023a55bc6c3c53d89cf02b92f5c5005bfe920
+  - filename: nitrogen/siglip-large-patch16-256/tokenizer_config.json
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/tokenizer_config.json
+    sha256: d6423dae508cc3a129d22ea443841c111832a1a73125b8f25ea8736951698bcb
+- name: nitrogen-sonic3
+  description: "The community Sonic 3 fine-tune of NitroGen."
+  config_file:
+    name: nitrogen-sonic3
+    backend: nitrogen
+    known_usecases:
+      - chat
+    parameters:
+      model: nitrogen/sonic3/ng.pt
+    template:
+      use_tokenizer_template: true
+  files:
+  - filename: nitrogen/sonic3/ng.pt
+    uri: https://huggingface.co/BotGoesBrrr/nitrogen-sonic3-ft/resolve/8c33a57398be672cbdd3c737dac75b2f65ee8b52/ng.pt
+    sha256: 4810a08bf98deb300276b48c9dd4c359218ac076304268cea258724b32a56e88
+  - filename: nitrogen/siglip-large-patch16-256/config.json
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/config.json
+    sha256: 1053d489ef9053689fc5ee3659c2212c6a44a6f0d71daeabb23a163a3150e57d
+  - filename: nitrogen/siglip-large-patch16-256/model.safetensors
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/model.safetensors
+    sha256: e00d04afb3fb45b0113e5c79b6d6889eff5f240e9c54cfb149dab4a3e304e9a3
+  - filename: nitrogen/siglip-large-patch16-256/preprocessor_config.json
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/preprocessor_config.json
+    sha256: e12b577bd0da1f9bf6a0b8d3d78c8f9b55b9d99dec25556954e19cfc7b8ecf28
+  - filename: nitrogen/siglip-large-patch16-256/special_tokens_map.json
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/special_tokens_map.json
+    sha256: 2b6a1ff67a27e0df9ac0c7d93250fc0d87431c7b366b3d5669217104f9088a26
+  - filename: nitrogen/siglip-large-patch16-256/spiece.model
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/spiece.model
+    sha256: 1e5036bed065526c3c212dfbe288752391797c4bb1a284aa18c9a0b23fcaf8ec
+  - filename: nitrogen/siglip-large-patch16-256/tokenizer.json
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/tokenizer.json
+    sha256: c6e405cb7c670d56636a9402c81023a55bc6c3c53d89cf02b92f5c5005bfe920
+  - filename: nitrogen/siglip-large-patch16-256/tokenizer_config.json
+    uri: https://huggingface.co/google/siglip-large-patch16-256/resolve/d0da9f876e7d66b4e250cd2450c3ba2ce735e447/tokenizer_config.json
+    sha256: d6423dae508cc3a129d22ea443841c111832a1a73125b8f25ea8736951698bcb
+- name: noobai-xl
+  description: "NoobAI-XL 1.1 anime text to image with the fp16-fix SDXL VAE."
+  config_file:
+    name: noobai-xl
+    backend: stablediffusion-ggml
+    cfg_scale: 5.5
+    step: 28
+    options:
+      - sampler:euler_a
+      - vae_path:noobai-xl/sdxl_vae.safetensors
+    parameters:
+      model: noobai-xl/NoobAI-XL-v1.1.safetensors
+  files:
+  - filename: noobai-xl/NoobAI-XL-v1.1.safetensors
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/NoobAI-XL-v1.1.safetensors
+    sha256: 6681e8e4b134c81f16533acedb0d406d7e5e366e1624b4105178c64d00b05d51
+  - filename: noobai-xl/sdxl_vae.safetensors
+    uri: https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/resolve/207b116dae70ace3637169f1ddd2434b91b3a8cd/sdxl_vae.safetensors
+    sha256: 235745af8d86bf4a4c1b5b4f529868b37019a10f7c0b2e79ad0abca3a22bc6e1
+- name: noobai-xl-img2img
+  description: "NoobAI-XL 1.1 image to image on diffusers."
+  config_file:
+    name: noobai-xl-img2img
+    backend: diffusers
+    cfg_scale: 5.5
+    step: 28
+    diffusers:
+      cuda: true
+      pipeline_type: StableDiffusionXLImg2ImgPipeline
+    options:
+      - torch_dtype:fp16
+      - strength:0.45
+    parameters:
+      model: noobai-xl/diffusers
+  files: &noobai-diffusers
+  - filename: noobai-xl/diffusers/scheduler/scheduler_config.json
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/scheduler/scheduler_config.json
+    sha256: 227b78f3ce3ed1c49b526e274289b3273a4be8b0c19583ae30bd077105bb8e8e
+  - filename: noobai-xl/diffusers/text_encoder/config.json
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/text_encoder/config.json
+    sha256: cc95865c50a635590c937276065a7edf7f1b7c8a5dac3e89a35a8baf3d89752f
+  - filename: noobai-xl/diffusers/text_encoder/model.safetensors
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/text_encoder/model.safetensors
+    sha256: 0580de479d979c217e6bc07399e9311e8d681b3a7dc6548b6a41e2ee673bbe40
+  - filename: noobai-xl/diffusers/text_encoder_2/config.json
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/text_encoder_2/config.json
+    sha256: 72d5a791b9aa28183d81660a22b66a4634dc25796d395c59a9ff02ba31187dff
+  - filename: noobai-xl/diffusers/text_encoder_2/model.safetensors
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/text_encoder_2/model.safetensors
+    sha256: 6d594c7736feb8ca106cc0cd85e4ca5c5bc56170c5942a0e30903754142ec6c4
+  - filename: noobai-xl/diffusers/tokenizer/merges.txt
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/tokenizer/merges.txt
+    sha256: 9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a
+  - filename: noobai-xl/diffusers/tokenizer/special_tokens_map.json
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/tokenizer/special_tokens_map.json
+    sha256: c4864a9376a8401918425bed71fc14fc0e81f9b59ec45c1cf96cccb2df508eac
+  - filename: noobai-xl/diffusers/tokenizer/tokenizer_config.json
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/tokenizer/tokenizer_config.json
+    sha256: 7eb36a76a02551ce8583dbee08d062e672997a5fe1db82ebc642d88c7e79cc96
+  - filename: noobai-xl/diffusers/tokenizer/vocab.json
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/tokenizer/vocab.json
+    sha256: e089ad92ba36837a0d31433e555c8f45fe601ab5c221d4f607ded32d9f7a4349
+  - filename: noobai-xl/diffusers/tokenizer_2/merges.txt
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/tokenizer_2/merges.txt
+    sha256: 9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a
+  - filename: noobai-xl/diffusers/tokenizer_2/special_tokens_map.json
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/tokenizer_2/special_tokens_map.json
+    sha256: f118ab3a983206e4f32583448de6bd6aae4ee21869135cef1f5848a753cdaab6
+  - filename: noobai-xl/diffusers/tokenizer_2/tokenizer_config.json
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/tokenizer_2/tokenizer_config.json
+    sha256: 516314ccab66918d7cb647480ac27abd3520d14e1e5825aac99f50c851c16071
+  - filename: noobai-xl/diffusers/tokenizer_2/vocab.json
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/tokenizer_2/vocab.json
+    sha256: e089ad92ba36837a0d31433e555c8f45fe601ab5c221d4f607ded32d9f7a4349
+  - filename: noobai-xl/diffusers/unet/config.json
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/unet/config.json
+    sha256: cf875d23d4179c413c0878d146c5b8a22cec07522199cc36a2d5c1969791e2f6
+  - filename: noobai-xl/diffusers/unet/diffusion_pytorch_model.safetensors
+    uri: https://huggingface.co/Laxhar/noobai-XL-1.1/resolve/814a274af2b8097c0828819d561ec74c7d0c6cea/unet/diffusion_pytorch_model.safetensors
+    sha256: 4dcc81b3c7af7c331ed7a4d325b86b7b0bbe04867df6b4e1c5bb6ff5743a7bb2
+  - filename: noobai-xl/diffusers/vae/config.json
+    uri: https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/resolve/207b116dae70ace3637169f1ddd2434b91b3a8cd/config.json
+    sha256: f18b16fa4381c90ab44a3d7abd2e90afd05a2c31b8ca69998bc93c6453aeb7b7
+  - filename: noobai-xl/diffusers/vae/diffusion_pytorch_model.safetensors
+    uri: https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/resolve/207b116dae70ace3637169f1ddd2434b91b3a8cd/diffusion_pytorch_model.safetensors
+    sha256: 1b909373b28f2137098b0fd9dbc6f97f8410854f31f84ddc9fa04b077b0ace2c
+  - filename: noobai-xl/diffusers/controlnet/config.json
+    uri: https://huggingface.co/Eugeoter/noob-sdxl-controlnet-lineart_anime/resolve/61ed2d40710b32a5a1c9873f7dec89ff0af9f2a4/config.json
+    sha256: 6387a06b85245ea333f7e5a1b6b2d5cfe6420e0d36a24a8d442b1fc08d300d2a
+  - filename: noobai-xl/diffusers/controlnet/diffusion_pytorch_model.safetensors
+    uri: https://huggingface.co/Eugeoter/noob-sdxl-controlnet-lineart_anime/resolve/61ed2d40710b32a5a1c9873f7dec89ff0af9f2a4/diffusion_pytorch_model.safetensors
+    sha256: 683fc8d042381751ca3ea6486e4ec1df30771d3c20f599598b9d030779c65337
+  - filename: noobai-xl/diffusers/model_index.json
+    uri: https://raw.githubusercontent.com/h4ks-com/localai-backends/main/models/files/noobai-xl/model_index.json
+    sha256: 175ba7a912754c4c4cc75e84aef77a2c05a62cedf7823f9818a4a3514799bc01
+- name: noobai-xl-colorize
+  description: "NoobAI-XL 1.1 with the anime lineart ControlNet, which colors a sketch."
+  config_file:
+    name: noobai-xl-colorize
+    backend: diffusers
+    cfg_scale: 6
+    step: 28
+    diffusers:
+      cuda: true
+      pipeline_type: StableDiffusionXLControlNetPipeline
+    options:
+      - torch_dtype:fp16
+      - controlnet_conditioning_scale:0.9
+    parameters:
+      model: noobai-xl/diffusers
+  files: *noobai-diffusers
+- name: qwen-image-2.1
+  description: "Qwen-Image 2.1 text to image."
+  config_file:
+    name: qwen-image-2.1
+    backend: stablediffusion-ggml
+    cfg_scale: 6
+    step: 25
+    options:
+      - diffusion_model
+      - llm_path:Qwen3-VL-8B-Instruct-Q4_K_M.gguf
+      - llm_vision_path:mmproj/mmproj-Qwen3-VL-8B-Instruct-F16.gguf
+      - vae_path:qwen_image_2.1_vae_bf16.safetensors
+      - sampler:euler
+    parameters:
+      model: qwen_image_2.1-Q8_0.gguf
+  files:
+  - filename: qwen_image_2.1-Q8_0.gguf
+    uri: https://huggingface.co/leejet/Qwen-Image-2.1-GGUF/resolve/cc11433936a06e9765f7c0c0b1f0436cfd2b9856/qwen_image_2.1-Q8_0.gguf
+    sha256: f8b244b00937f0e444a40dbf7866460871b89b30142594973b6012d1b471dc0a
+  - filename: qwen_image_2.1_vae_bf16.safetensors
+    uri: https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/cb504a4090723e43f17ad01cec0359490e2de613/vae/qwen_image_2.1_vae_bf16.safetensors
+    sha256: bb21f7473051e1ac368515dd3f2e15cd44d7a11748ee8823e1ddca3e4876b7c9
+  - filename: Qwen3-VL-8B-Instruct-Q4_K_M.gguf
+    uri: https://huggingface.co/unsloth/Qwen3-VL-8B-Instruct-GGUF/resolve/b93a7ee713758252c555be4210c00540df954dc2/Qwen3-VL-8B-Instruct-Q4_K_M.gguf
+    sha256: 108e7ff92b78eefd3db4741885104acba514255c11b617d3c7b197a5f46efe89
+  - filename: mmproj/mmproj-Qwen3-VL-8B-Instruct-F16.gguf
+    uri: https://huggingface.co/unsloth/Qwen3-VL-8B-Instruct-GGUF/resolve/b93a7ee713758252c555be4210c00540df954dc2/mmproj-F16.gguf
+    sha256: d406d03ebabefdef86a2c86bf0c1b65f9e046f7a81c218f25de4931b46a07fc4
+- name: qwen-image-2.1-uncensored
+  description: "Qwen-Image 2.1 with the Heretic text encoder."
+  config_file:
+    name: qwen-image-2.1-uncensored
+    backend: stablediffusion-ggml
+    cfg_scale: 6
+    step: 25
+    options:
+      - diffusion_model
+      - llm_path:qwen-image-2.1-heretic/qwen3vl_8b_heretic-Q4_K_M.gguf
+      - llm_vision_path:qwen-image-2.1-heretic/mmproj-qwen3vl_8b_heretic-f16.gguf
+      - vae_path:qwen_image_2.1_vae_bf16.safetensors
+      - sampler:euler
+    parameters:
+      model: qwen_image_2.1-Q8_0.gguf
+  files:
+  - filename: qwen_image_2.1-Q8_0.gguf
+    uri: https://huggingface.co/leejet/Qwen-Image-2.1-GGUF/resolve/cc11433936a06e9765f7c0c0b1f0436cfd2b9856/qwen_image_2.1-Q8_0.gguf
+    sha256: f8b244b00937f0e444a40dbf7866460871b89b30142594973b6012d1b471dc0a
+  - filename: qwen_image_2.1_vae_bf16.safetensors
+    uri: https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/cb504a4090723e43f17ad01cec0359490e2de613/vae/qwen_image_2.1_vae_bf16.safetensors
+    sha256: bb21f7473051e1ac368515dd3f2e15cd44d7a11748ee8823e1ddca3e4876b7c9
+  - filename: qwen-image-2.1-heretic/qwen3vl_8b_heretic-Q4_K_M.gguf
+    uri: https://huggingface.co/pottokao/Qwen-Image-2.1-Text-Encoder-Heretic-GGUF/resolve/23813717f7f9282b372c23c7207468a7a168fa68/qwen3vl_8b_heretic-Q4_K_M.gguf
+    sha256: 1338274ac7a6344f262a16c7a52d1bd7fe789307d252733b23ea421126e5d343
+  - filename: qwen-image-2.1-heretic/mmproj-qwen3vl_8b_heretic-f16.gguf
+    uri: https://huggingface.co/pottokao/Qwen-Image-2.1-Text-Encoder-Heretic-GGUF/resolve/23813717f7f9282b372c23c7207468a7a168fa68/mmproj-qwen3vl_8b_heretic-f16.gguf
+    sha256: 4649839491c8df1ebc9bed2de158ad2a45b53ed1d3b311d92a69056b6764f101
+- name: noct-q-anime
+  description: "The Noct-Q Anime fine-tune of Qwen-Image 2.1. Its weights come from Civitai, which needs an API token, so we download noct-q-anime/noctQAnime-v1-fp8.safetensors separately."
+  config_file:
+    name: noct-q-anime
+    backend: stablediffusion-ggml
+    cfg_scale: 3
+    step: 25
+    options:
+      - diffusion_model
+      - llm_path:qwen-image-2.1-heretic/qwen3vl_8b_heretic-Q4_K_M.gguf
+      - llm_vision_path:qwen-image-2.1-heretic/mmproj-qwen3vl_8b_heretic-f16.gguf
+      - vae_path:qwen_image_2.1_vae_bf16.safetensors
+      - sampler:euler
+    parameters:
+      model: noct-q-anime/noctQAnime-v1-fp8.safetensors
+  files:
+  - filename: qwen_image_2.1_vae_bf16.safetensors
+    uri: https://huggingface.co/Comfy-Org/Qwen-Image-2.1/resolve/cb504a4090723e43f17ad01cec0359490e2de613/vae/qwen_image_2.1_vae_bf16.safetensors
+    sha256: bb21f7473051e1ac368515dd3f2e15cd44d7a11748ee8823e1ddca3e4876b7c9
+  - filename: qwen-image-2.1-heretic/qwen3vl_8b_heretic-Q4_K_M.gguf
+    uri: https://huggingface.co/pottokao/Qwen-Image-2.1-Text-Encoder-Heretic-GGUF/resolve/23813717f7f9282b372c23c7207468a7a168fa68/qwen3vl_8b_heretic-Q4_K_M.gguf
+    sha256: 1338274ac7a6344f262a16c7a52d1bd7fe789307d252733b23ea421126e5d343
+  - filename: qwen-image-2.1-heretic/mmproj-qwen3vl_8b_heretic-f16.gguf
+    uri: https://huggingface.co/pottokao/Qwen-Image-2.1-Text-Encoder-Heretic-GGUF/resolve/23813717f7f9282b372c23c7207468a7a168fa68/mmproj-qwen3vl_8b_heretic-f16.gguf
+    sha256: 4649839491c8df1ebc9bed2de158ad2a45b53ed1d3b311d92a69056b6764f101
+- name: imajev-4b
+  description: "imajev 4B vision chat model."
+  config_file:
+    name: imajev-4b
+    backend: llama-cpp
+    # imajev answers right after an empty thinking block; with thinking on it would start reasoning there.
+    reasoning_effort: none
+    context_size: 8192
+    mmproj: imajev/imajev-4b-mmproj-f16.gguf
+    options:
+      - use_jinja:true
+    parameters:
+      model: imajev/imajev-4b-Q8_0.gguf
+      temperature: 0
+    template:
+      use_tokenizer_template: true
+  files:
+  - filename: imajev/imajev-4b-Q8_0.gguf
+    uri: https://huggingface.co/mindchain/imajev-4b-GGUF/resolve/4b9045adf0c9913f02b802e9c555a8d772b8cf08/imajev-4b-Q8_0.gguf
+    sha256: 364cd8212cb66eccd06d8712230ec808a61e352637f0a0495700bb292b280d0a
+  - filename: imajev/imajev-4b-mmproj-f16.gguf
+    uri: https://huggingface.co/mindchain/imajev-4b-GGUF/resolve/4b9045adf0c9913f02b802e9c555a8d772b8cf08/imajev-4b-mmproj-f16.gguf
+    sha256: eb8fb4b4433115e7f92985b7aa74a47d3ce2d891d429367d08aa8405a894e4cc
+- name: ace-step-cover
+  description: "ACE-Step 1.5 turbo on /audio/transform, which covers or continues the uploaded song. It uses the weights of the localai@ace-step-turbo model."
+  config_file:
+    name: ace-step-cover
+    backend: ace-step-cover
+    known_usecases:
+      - audio_transform
+    options:
+      - device:auto
+      - use_flash_attention:true
+      - offload_to_cpu:false
+      - offload_dit_to_cpu:false
+      - init_lm:true
+      - lm_model_path:acestep-5Hz-lm-0.6B
+      - lm_backend:pt
+      - temperature:0.85
+      - top_p:0.9
+      - lm_cfg_scale:2.0
+      - inference_steps:8
+      - guidance_scale:7.0
+      - batch_size:1
+    parameters:
+      model: acestep-v15-turbo
+- name: kimodo-soma-rp
+  description: "Kimodo text to motion on Vulkan, using the weights of the localai@kimodo-soma-rp model."
+  config_file:
+    name: kimodo-soma-rp
+    backend: kimodocpp
+    known_usecases:
+      - 3d_animation
+    options:
+      - text_bundle:kimodo/text/Llama-3-Kimodo-Q8_0.gguf
+      - device:vulkan
+      - frames:150
+      - steps:100
+      - text_guidance:2
+    parameters:
+      model: kimodo/kimodo-soma-rp-v1.1-f32.gguf

@@ -6,13 +6,10 @@ short pass at full size; width and height must be multiples of 64) or 1 (full si
 runs a fixed sigma schedule without guidance, so step and cfg_scale have no effect.
 """
 
-import argparse
 import ctypes
 import gc
 import os
-import signal
 import sys
-from concurrent import futures
 
 import backend_pb2
 import backend_pb2_grpc
@@ -31,7 +28,7 @@ from diffusers.pipelines.ltx2.utils import DISTILLED_SIGMA_VALUES, STAGE_2_DISTI
 from diffusers.utils import encode_video, load_image
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
-from grpc_auth import get_auth_interceptors
+from grpc_server import run
 from python_utils import parse_options
 
 DEFAULT_FPS = 24
@@ -192,27 +189,5 @@ class BackendServicer(backend_pb2_grpc.BackendServicer):
         return backend_pb2.Result(success=True)
 
 
-def serve(address: str) -> None:
-    server = grpc.server(
-        futures.ThreadPoolExecutor(max_workers=1),
-        options=[("grpc.max_receive_message_length", 50 * 1024 * 1024)],
-        interceptors=get_auth_interceptors(),
-    )
-    backend_pb2_grpc.add_BackendServicer_to_server(BackendServicer(), server)
-    server.add_insecure_port(address)
-    server.start()
-    print(f"[ltx2] listening on {address}", file=sys.stderr)
-
-    def stop(_sig, _frame):
-        server.stop(0)
-        sys.exit(0)
-
-    signal.signal(signal.SIGINT, stop)
-    signal.signal(signal.SIGTERM, stop)
-    server.wait_for_termination()
-
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--addr", default="localhost:50051")
-    serve(parser.parse_args().addr)
+    run(BackendServicer(), "ltx2")

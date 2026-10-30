@@ -24,6 +24,9 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4", "C90", "PIE", "RET", "RUF"
 [tool.ruff.lint.mccabe]
 max-complexity = 10
 
+[tool.ty.environment]
+extra-paths = ["shared"]
+
 # Each backend's heavy dependencies and LocalAI's generated gRPC modules exist only inside the image build.
 [tool.ty.analysis]
 replace-imports-with-any = [
@@ -37,8 +40,14 @@ replace-imports-with-any = [
     "diffusers",
     "diffusers.**",
     "python_utils",
+    "numpy",
+    "PIL",
+    "nitrogen.**",
+    "backend",
+    "acestep.**",
+    "soundfile",
 ]
 
 [tool.vulture]
 min_confidence = 80
-paths = ["backends"]
+paths = ["backends", "shared"]
