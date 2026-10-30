@@ -1,0 +1,11 @@
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.9.1
+torchvision==0.24.1
+torchaudio==2.9.1
+# LTX-2.5 support is on diffusers main only.
+diffusers @ https://github.com/huggingface/diffusers/archive/d8c1b13c756df0059bcdb6e477a1eafcd502098d.tar.gz
+transformers==5.20.2
+bitsandbytes==0.50.2
+gguf==0.19.0
+accelerate==1.15.0
+av==18.1.0

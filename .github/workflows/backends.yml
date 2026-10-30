@@ -1,0 +1,82 @@
+name: backends
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # The LocalAI release whose Python backend build and gRPC protocol the images use.
+  LOCALAI_REF: a95da0a46c7defbd9c1644e33479583dbd35ea3c
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+      - uses: j178/prek-action@v3
+
+  plan:
+    if: github.event_name != 'pull_request'
+    needs: lint
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    outputs:
+      builds: ${{ steps.missing.outputs.builds }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Tags are versions and never move, so we build only the images ghcr does not have yet.
+      - id: missing
+        run: |
+          builds=$(yq -o=json -I=0 '.[] | {"name": .name, "uri": .uri}' index.yaml | while read -r entry; do
+            docker manifest inspect "$(jq -r .uri <<<"$entry")" >/dev/null 2>&1 || echo "$entry"
+          done | jq -sc .)
+          echo "builds=$builds" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.builds != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.builds) }}
+    steps:
+      - uses: jlumbroso/free-disk-space@v2.0.0
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: mudler/LocalAI
+          ref: ${{ env.LOCALAI_REF }}
+          path: localai
+      - run: cp -r "backends/${{ matrix.name }}" localai/backend/python/
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: localai
+          file: localai/backend/Dockerfile.python
+          push: true
+          tags: ${{ matrix.uri }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          build-args: |
+            BACKEND=${{ matrix.name }}
+            BUILD_TYPE=cublas
+            CUDA_MAJOR_VERSION=12
+            CUDA_MINOR_VERSION=8
+            BASE_IMAGE=ubuntu:24.04
+            UBUNTU_VERSION=2404

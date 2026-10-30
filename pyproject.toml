@@ -1,0 +1,52 @@
+[project]
+name = "localai-backends"
+version = "0"
+requires-python = ">=3.11"
+
+[dependency-groups]
+dev = [
+    "complexipy==8.3.0",
+    "pylint==4.1.3",
+    "ruff==0.17.3",
+    "ty==0.0.95",
+    "vulture==2.16",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4", "C90", "PIE", "RET", "RUF", "PL"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pep8-naming]
+# LocalAI's gRPC service names its methods in PascalCase.
+extend-ignore-names = ["Health", "LoadModel", "GenerateVideo", "Free"]
+
+[tool.ty.environment]
+python-version = "3.11"
+
+# Each backend's heavy dependencies and LocalAI's generated gRPC modules exist only inside the image build.
+[tool.ty.analysis]
+replace-imports-with-any = [
+    "backend_pb2",
+    "backend_pb2_grpc",
+    "grpc",
+    "grpc_auth",
+    "torch",
+    "torch.**",
+    "transformers",
+    "diffusers",
+    "diffusers.**",
+    "PIL",
+]
+
+[tool.vulture]
+min_confidence = 80
+paths = ["backends"]
