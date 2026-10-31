@@ -98,6 +98,8 @@ class Pipelines:
         # The whole pipeline needs more than 24 GB, so we move each part onto the card only while it runs.
         self.video.enable_model_cpu_offload()
         self.video.vae.enable_tiling()
+        # Decoding every frame at once needs about 10 GB per 4 seconds of video, so we decode a few frames at a time.
+        self.video.vae.use_framewise_decoding = True
         upsampler = LTX2LatentUpsamplerModel.from_pretrained(
             diffusers_dir, subfolder="latent_upsampler", torch_dtype=torch.bfloat16
         )
