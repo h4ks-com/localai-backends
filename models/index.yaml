@@ -300,6 +300,94 @@
   - filename: imajev/imajev-4b-mmproj-f16.gguf
     uri: https://huggingface.co/mindchain/imajev-4b-GGUF/resolve/4b9045adf0c9913f02b802e9c555a8d772b8cf08/imajev-4b-mmproj-f16.gguf
     sha256: eb8fb4b4433115e7f92985b7aa74a47d3ce2d891d429367d08aa8405a894e4cc
+- name: lfm3-1.7b
+  description: "LiquidAI LFM3-1.7B, a small text model for agents and tool calls with a 256K context, on /v1/chat/completions."
+  config_file:
+    name: lfm3-1.7b
+    backend: llama-cpp
+    context_size: 32768
+    function:
+      xml_format_preset: lfm3
+    parameters:
+      model: lfm3/LFM3-1.7B-Q8_0.gguf
+    template:
+      use_tokenizer_template: true
+  files:
+  - filename: lfm3/LFM3-1.7B-Q8_0.gguf
+    uri: https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF/resolve/bad5729bba61d076fff20d2548e62526665af215/LFM3-1.7B-Q8_0.gguf
+    sha256: 8f6b24182258205e9e01e21f1f24a1f208c1e8115578825d202ce39976af20b6
+- name: lfm3-vl-2b
+  description: "LiquidAI LFM3-VL-2B, a vision model for pictures and video frames, on /v1/chat/completions with image_url parts."
+  config_file:
+    name: lfm3-vl-2b
+    backend: llama-cpp
+    context_size: 16384
+    mmproj: lfm3/mmproj-LFM3-VL-2B-F16.gguf
+    parameters:
+      model: lfm3/LFM3-VL-2B-Q8_0.gguf
+    template:
+      use_tokenizer_template: true
+  files:
+  - filename: lfm3/LFM3-VL-2B-Q8_0.gguf
+    uri: https://huggingface.co/LiquidAI/LFM3-VL-2B-GGUF/resolve/b36554cfd35854b06429900131730cd80f092cdb/LFM3-VL-2B-Q8_0.gguf
+    sha256: e138e54189a751d90ea8c0b236360490613ecd465d28d68fa6094d3db7fa6727
+  - filename: lfm3/mmproj-LFM3-VL-2B-F16.gguf
+    uri: https://huggingface.co/LiquidAI/LFM3-VL-2B-GGUF/resolve/b36554cfd35854b06429900131730cd80f092cdb/mmproj-LFM3-VL-2B-F16.gguf
+    sha256: 1d8e6e58eefc093e09d6332f081516e1ddbd5b35cfca7f35463fb270db230b1e
+- name: lfm3-omni-2b
+  description: "LiquidAI LFM3-Omni-2B, which takes pictures, audio and text together on /v1/chat/completions."
+  config_file:
+    name: lfm3-omni-2b
+    backend: llama-cpp
+    context_size: 16384
+    mmproj: lfm3/mmproj-LFM3-Omni-2B-F16.gguf
+    parameters:
+      model: lfm3/LFM3-Omni-2B-Q8_0.gguf
+    template:
+      use_tokenizer_template: true
+  files:
+  - filename: lfm3/LFM3-Omni-2B-Q8_0.gguf
+    uri: https://huggingface.co/LiquidAI/LFM3-Omni-2B-GGUF/resolve/3d29af2ad166f8299c2d820937e47dc0add20ffc/LFM3-Omni-2B-Q8_0.gguf
+    sha256: 59118f661eaacb93d204723d76355b53347f0940b508c11412f6290fd49158d4
+  - filename: lfm3/mmproj-LFM3-Omni-2B-F16.gguf
+    uri: https://huggingface.co/LiquidAI/LFM3-Omni-2B-GGUF/resolve/3d29af2ad166f8299c2d820937e47dc0add20ffc/mmproj-LFM3-Omni-2B-F16.gguf
+    sha256: 361bc95192c7d9156b566fcd4e48930363b78218e493fb1be607456bd51586e3
+- name: d1-2b
+  description: "LiquidAI d1-2B, a decision model over text and pictures: send typed choice, score and noul questions to /v1/systemone or /v1/decisions and get every answer with its probability in one pass."
+  config_file:
+    name: d1-2b
+    backend: llama-cpp
+    context_size: 8192
+    known_usecases:
+      - decisions
+    mmproj: lfm3/mmproj-d1-2B-F16.gguf
+    parameters:
+      model: lfm3/d1-2B-Q8_0.gguf
+  files:
+  - filename: lfm3/d1-2B-Q8_0.gguf
+    uri: https://huggingface.co/LiquidAI/d1-2B-GGUF/resolve/e968f6575f0d4fad928312d7af15cad90fd365c0/d1-2B-Q8_0.gguf
+    sha256: 073313d92b53b0ac8193db6e906cb3c78a98183d244b15b7b8f5426115c6738c
+  - filename: lfm3/mmproj-d1-2B-F16.gguf
+    uri: https://huggingface.co/LiquidAI/d1-2B-GGUF/resolve/e968f6575f0d4fad928312d7af15cad90fd365c0/mmproj-d1-2B-F16.gguf
+    sha256: c54d0c0cc66c7e5b6b516204cab556e41d1da9e9cd970245a57d7b509af68ab3
+- name: d1-omni-2b
+  description: "LiquidAI d1-Omni-2B, the d1 decision model that also listens: the same typed questions on /v1/systemone or /v1/decisions over text, pictures and audio."
+  config_file:
+    name: d1-omni-2b
+    backend: llama-cpp
+    context_size: 8192
+    known_usecases:
+      - decisions
+    mmproj: lfm3/mmproj-d1-Omni-2B-F16.gguf
+    parameters:
+      model: lfm3/d1-Omni-2B-Q8_0.gguf
+  files:
+  - filename: lfm3/d1-Omni-2B-Q8_0.gguf
+    uri: https://huggingface.co/LiquidAI/d1-Omni-2B-GGUF/resolve/c53ae0b1f92b17065e9158d34019c9ca1ea5bcf8/d1-Omni-2B-Q8_0.gguf
+    sha256: aedf1a7c341b4281979423dbc39e9c3d3ad1da8834156c8e75af5399ca3b0861
+  - filename: lfm3/mmproj-d1-Omni-2B-F16.gguf
+    uri: https://huggingface.co/LiquidAI/d1-Omni-2B-GGUF/resolve/c53ae0b1f92b17065e9158d34019c9ca1ea5bcf8/mmproj-d1-Omni-2B-F16.gguf
+    sha256: b22f8d7d5538dbc09897b214e940240be5fe0aee429ec55c83bd9fdd62d8af62
 - name: ace-step-cover
   description: "Covers and continuations on /audio/transform: audio=<song>, optional reference=<style song>, params[task] (cover re-sings the song; continue adds params[seconds] of music after its end), params[caption], params[lyrics], params[strength] (0-1, how closely a cover follows the source), params[language], params[seed]. Needs the weights of localai@ace-step-turbo."
   config_file:
