@@ -304,7 +304,8 @@
   description: "LiquidAI LFM3-1.7B, a small text model for agents and tool calls with a 256K context, on /v1/chat/completions."
   config_file:
     name: lfm3-1.7b
-    backend: llama-cpp
+    # The LFM3 architecture is only in the master llama.cpp build so far.
+    backend: cuda12-llama-cpp-development
     context_size: 32768
     function:
       xml_format_preset: lfm3
@@ -320,7 +321,7 @@
   description: "LiquidAI LFM3-VL-2B, a vision model for pictures and video frames, on /v1/chat/completions with image_url parts."
   config_file:
     name: lfm3-vl-2b
-    backend: llama-cpp
+    backend: cuda12-llama-cpp-development
     context_size: 16384
     mmproj: lfm3/mmproj-LFM3-VL-2B-F16.gguf
     parameters:
@@ -338,7 +339,7 @@
   description: "LiquidAI LFM3-Omni-2B, which takes pictures, audio and text together on /v1/chat/completions."
   config_file:
     name: lfm3-omni-2b
-    backend: llama-cpp
+    backend: cuda12-llama-cpp-development
     context_size: 16384
     mmproj: lfm3/mmproj-LFM3-Omni-2B-F16.gguf
     parameters:
@@ -356,7 +357,7 @@
   description: "LiquidAI d1-2B, a decision model over text and pictures: send typed choice, score and noul questions to /v1/systemone or /v1/decisions and get every answer with its probability in one pass."
   config_file:
     name: d1-2b
-    backend: llama-cpp
+    backend: cuda12-llama-cpp-development
     context_size: 8192
     known_usecases:
       - decisions
@@ -374,7 +375,7 @@
   description: "LiquidAI d1-Omni-2B, the d1 decision model that also listens: the same typed questions on /v1/systemone or /v1/decisions over text, pictures and audio."
   config_file:
     name: d1-omni-2b
-    backend: llama-cpp
+    backend: cuda12-llama-cpp-development
     context_size: 8192
     known_usecases:
       - decisions
