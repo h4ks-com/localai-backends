@@ -389,6 +389,37 @@
   - filename: lfm3/mmproj-d1-Omni-2B-F16.gguf
     uri: https://huggingface.co/LiquidAI/d1-Omni-2B-GGUF/resolve/c53ae0b1f92b17065e9158d34019c9ca1ea5bcf8/mmproj-d1-Omni-2B-F16.gguf
     sha256: b22f8d7d5538dbc09897b214e940240be5fe0aee429ec55c83bd9fdd62d8af62
+- name: lfm3-audio-2b
+  description: "LiquidAI LFM3-Audio-2B: speech in and out in one model. It transcribes on /v1/audio/transcriptions, speaks with the voices female or male on /tts, and answers spoken or written questions on /v1/chat/completions and /v1/realtime."
+  config_file:
+    name: lfm3-audio-2b
+    backend: cuda12-llama-cpp-development
+    context_size: 8192
+    function:
+      xml_format_preset: lfm3
+    known_usecases:
+      - realtime_audio
+      - chat
+      - transcript
+      - tts
+    mmproj: lfm3/mmproj-LFM3-Audio-2B-F16.gguf
+    options:
+      - parallel:2
+    parameters:
+      model: lfm3/LFM3-Audio-2B-Q8_0.gguf
+    pipeline:
+      any_to_any: true
+    template:
+      use_tokenizer_template: true
+    tts:
+      voice: female
+  files:
+  - filename: lfm3/LFM3-Audio-2B-Q8_0.gguf
+    uri: https://huggingface.co/LiquidAI/LFM3-Audio-2B-GGUF/resolve/02355c1a141e464a064f2ab2c276638dbcb7f38a/LFM3-Audio-2B-Q8_0.gguf
+    sha256: d4e36902ba8f0ee7b333596030a59d650f88ac76660b4d9ba5ff77c3c2258fc0
+  - filename: lfm3/mmproj-LFM3-Audio-2B-F16.gguf
+    uri: https://huggingface.co/LiquidAI/LFM3-Audio-2B-GGUF/resolve/02355c1a141e464a064f2ab2c276638dbcb7f38a/mmproj-LFM3-Audio-2B-F16.gguf
+    sha256: bd0fce0670c96e405a753f996701dee6568bc6a1318a80091d74fb58f7510d79
 - name: ace-step-cover
   description: "Covers and continuations on /audio/transform: audio=<song>, optional reference=<style song>, params[task] (cover re-sings the song; continue adds params[seconds] of music after its end), params[caption], params[lyrics], params[strength] (0-1, how closely a cover follows the source), params[language], params[seed]. Needs the weights of localai@ace-step-turbo."
   config_file:
