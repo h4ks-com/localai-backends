@@ -1,6 +1,6 @@
 - name: ltx2
-  version: "2"
-  uri: ghcr.io/h4ks-com/localai-backends:ltx2-cuda12-2
+  version: "3"
+  uri: ghcr.io/h4ks-com/localai-backends:ltx2-cuda12-3
   description: LTX-2.5 distilled image to video on PyTorch, with the two-stage x2 latent upscale.
   urls:
   - https://huggingface.co/Lightricks/LTX-2.5

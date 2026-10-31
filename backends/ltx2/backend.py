@@ -26,6 +26,7 @@ from diffusers.loaders.single_file_model import SINGLE_FILE_LOADABLE_CLASSES
 from diffusers.pipelines.ltx2.latent_upsampler import LTX2LatentUpsamplerModel
 from diffusers.pipelines.ltx2.utils import DISTILLED_SIGMA_VALUES, STAGE_2_DISTILLED_SIGMA_VALUES
 from diffusers.utils import encode_video, load_image
+from PIL import ImageOps
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "common"))
 from grpc_server import run
@@ -107,7 +108,8 @@ class Pipelines:
         frames = valid_frame_count(request.num_frames or 121)
         width, height = request.width or 576, request.height or 1024
         shared = {
-            "image": load_image(request.start_image),
+            # The pipeline stretches the first frame to the video size, so we crop it to that shape first.
+            "image": ImageOps.fit(load_image(request.start_image), (width, height)),
             "prompt": request.prompt,
             "frame_rate": float(fps),
             "guidance_scale": 1.0,
