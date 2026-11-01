@@ -307,6 +307,8 @@
     # The LFM3 architecture is only in the master llama.cpp build so far.
     backend: cuda12-llama-cpp-development
     context_size: 32768
+    # LFM3 thinks by default and leaves content empty, so we turn thinking off; a request can still ask for it.
+    reasoning_effort: none
     function:
       xml_format_preset: lfm3
     parameters:
@@ -322,6 +324,7 @@
   config_file:
     name: lfm3-vl-2b
     backend: cuda12-llama-cpp-development
+    reasoning_effort: none
     context_size: 16384
     mmproj: lfm3/mmproj-LFM3-VL-2B-F16.gguf
     parameters:
