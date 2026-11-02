@@ -25,3 +25,12 @@
   tags:
   - music-generation
   - cuda
+- name: soulx-singer
+  version: "1"
+  uri: ghcr.io/h4ks-com/localai-backends:soulx-singer-cuda12-1
+  description: SoulX-Singer on /audio/transform, a score of notes and words in and the sung vocal out, in a bundled voice or the timbre of an uploaded clip.
+  urls:
+  - https://github.com/Soul-AILab/SoulX-Singer
+  tags:
+  - singing-voice-synthesis
+  - cuda

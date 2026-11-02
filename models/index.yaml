@@ -461,3 +461,31 @@
       - text_guidance:2
     parameters:
       model: kimodo/kimodo-soma-rp-v1.1-f32.gguf
+- name: soulx-singer
+  description: "SoulX-Singer (Apache-2.0): POST /audio/transform with params[score] as notes and words, and params[voice] as en, zh or clip (sings in the uploaded audio's timbre)."
+  config_file:
+    name: soulx-singer
+    backend: soulx-singer
+    known_usecases:
+      - audio_transform
+    parameters:
+      model: soulx-singer/model.pt
+  files:
+  - filename: soulx-singer/model.pt
+    uri: https://huggingface.co/Soul-AILab/SoulX-Singer/resolve/40493ad90286056c7a9095035164434a79daa8c9/model.pt
+    sha256: 447eaf41f91a6b6659d55e9ec3c9b809221724fb8592aebaec35a23751a5b500
+  - filename: soulx-singer/model-svc.pt
+    uri: https://huggingface.co/Soul-AILab/SoulX-Singer/resolve/40493ad90286056c7a9095035164434a79daa8c9/model-svc.pt
+    sha256: 38e72d9e15be6eef3cc937daaf81421a7b5b546816786530bb9aa346cee5d43c
+  - filename: soulx-singer/rmvpe.pt
+    uri: https://huggingface.co/Soul-AILab/SoulX-Singer-Preprocess/resolve/83dc50289d22a81b1e9998f5b9e111aef7c1fdcd/rmvpe/rmvpe.pt
+    sha256: 6d62215f4306e3ca278246188607209f09af3dc77ed4232efdd069798c4ec193
+  - filename: soulx-singer/whisper-base/config.json
+    uri: https://huggingface.co/openai/whisper-base/resolve/e37978b90ca9030d5170a5c07aadb050351a65bb/config.json
+    sha256: a153c53883a6799b6f056b4a8d1a515c9926d03994682ba88a7616618d7da0c1
+  - filename: soulx-singer/whisper-base/preprocessor_config.json
+    uri: https://huggingface.co/openai/whisper-base/resolve/e37978b90ca9030d5170a5c07aadb050351a65bb/preprocessor_config.json
+    sha256: 9b5cd03a36fbb8a627c64d98a5b5b126ead95a77720723944487311f0110b666
+  - filename: soulx-singer/whisper-base/model.safetensors
+    uri: https://huggingface.co/openai/whisper-base/resolve/e37978b90ca9030d5170a5c07aadb050351a65bb/model.safetensors
+    sha256: 07cadb9f25677c8d50df603e66a98fbd842cce45047139baeb16e6219a1e807b

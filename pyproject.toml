@@ -46,6 +46,11 @@ replace-imports-with-any = [
     "backend",
     "acestep.**",
     "soundfile",
+    "librosa",
+    "pyworld",
+    "soulxsinger.**",
+    "preprocess.**",
+    "singer",
 ]
 
 [tool.vulture]
