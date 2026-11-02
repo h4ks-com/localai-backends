@@ -4,6 +4,7 @@ We answer AudioTransform. `params[score]` is JSON {"notes": [{start, length, pit
 with times in seconds and MIDI pitches. `params[voice]` names a bundled voice (en, zh); with `params[voice]=clip` we
 sing in the bundled voice of the language and convert the vocal into the timbre of the uploaded audio. LocalAI always
 requires an uploaded audio, so a bundled voice ignores it.
+`params[sample_rate]` resamples the output (24000 Hz by default).
 """
 
 import gc
@@ -18,6 +19,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "Sou
 import backend_pb2
 import backend_pb2_grpc
 import grpc
+import librosa
 import soundfile
 import torch
 from grpc_server import run
@@ -88,7 +90,10 @@ class BackendServicer(backend_pb2_grpc.BackendServicer):
             sung = self.singer.convert(sung, request.audio_path)
             if snap:
                 sung = snap_pitch(sung, notes)
-        soundfile.write(request.dst, sung, SAMPLE_RATE)
+        rate = int(params.get("sample_rate", SAMPLE_RATE))
+        if rate != SAMPLE_RATE:
+            sung = librosa.resample(sung, orig_sr=SAMPLE_RATE, target_sr=rate)
+        soundfile.write(request.dst, sung, rate)
         return backend_pb2.AudioTransformResult(dst=request.dst, reference_provided=voice == CLIP)
 
     def Free(self, request, context):
