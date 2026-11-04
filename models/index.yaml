@@ -462,7 +462,7 @@
     parameters:
       model: kimodo/kimodo-soma-rp-v1.1-f32.gguf
 - name: soulx-singer
-  description: "SoulX-Singer (Apache-2.0): POST /audio/transform with params[score] as notes and words, and params[voice] as en, zh or clip (sings in the uploaded audio's timbre)."
+  description: "SoulX-Singer (Apache-2.0): POST /audio/transform with params[score] as notes and words, and params[voice] as en, zh, female, female-breathy or clip (sings in the uploaded audio's timbre). The female voices are GTSinger altos from SoulX-Singer's eval set, CC BY-NC 4.0: non-commercial use, credit GTSinger."
   config_file:
     name: soulx-singer
     backend: soulx-singer
@@ -489,3 +489,15 @@
   - filename: soulx-singer/whisper-base/model.safetensors
     uri: https://huggingface.co/openai/whisper-base/resolve/e37978b90ca9030d5170a5c07aadb050351a65bb/model.safetensors
     sha256: 07cadb9f25677c8d50df603e66a98fbd842cce45047139baeb16e6219a1e807b
+  - filename: soulx-singer/voices/female.wav
+    uri: https://huggingface.co/datasets/Soul-AILab/SoulX-Singer-Eval-Dataset/resolve/3ff32f6a0a9c2f698b6bb7185810dde90ca4739e/gmo-svs/audio/prompt/GTSinger%23EN-Alto-2%23Mixed_Voice_and_Falsetto%23My%20Love%23Control_Group%230000.wav
+    sha256: d8424574d5106d0c7957925db2bcfe6490084b81a992a0eb6708d0981c496c79
+  - filename: soulx-singer/voices/female.json
+    uri: https://raw.githubusercontent.com/h4ks-com/localai-backends/58aec791a92c3d55e54f9be8d7bc424e258b71fc/models/files/soulx-singer/voices/female.json
+    sha256: 530ff28ed2759223bb03395037857e26a1a89de7d0985b860237e5b40f978131
+  - filename: soulx-singer/voices/female-breathy.wav
+    uri: https://huggingface.co/datasets/Soul-AILab/SoulX-Singer-Eval-Dataset/resolve/3ff32f6a0a9c2f698b6bb7185810dde90ca4739e/gmo-svs/audio/prompt/GTSinger%23EN-Alto-1%23Breathy%23safe%20and%20sound%23Breathy_Group%230000.wav
+    sha256: 7725f936ef362c7f80697f359e2acea3d38666bfc950ef76930975c7debf651d
+  - filename: soulx-singer/voices/female-breathy.json
+    uri: https://raw.githubusercontent.com/h4ks-com/localai-backends/58aec791a92c3d55e54f9be8d7bc424e258b71fc/models/files/soulx-singer/voices/female-breathy.json
+    sha256: 82d78b3682f97223145f68dc55a093c3aac20f0b217758f51ef9f4e5c31ba75f

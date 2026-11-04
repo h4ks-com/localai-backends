@@ -1,13 +1,14 @@
 """LocalAI backend for SoulX-Singer: a score of notes with words in, a sung vocal out.
 
 We answer AudioTransform. `params[score]` is JSON {"notes": [{start, length, pitch, word, slur}], "language", "snap"}
-with times in seconds and MIDI pitches. `params[voice]` names a bundled voice (en, zh); with `params[voice]=clip` we
-sing in the bundled voice of the language and convert the vocal into the timbre of the uploaded audio. LocalAI always
-requires an uploaded audio, so a bundled voice ignores it.
-`params[sample_rate]` resamples the output (24000 Hz by default).
+with times in seconds and MIDI pitches. `params[voice]` names a voice: en and zh from SoulX-Singer's examples, or one
+the gallery installs (female, female-breathy). With `params[voice]=clip` we sing in the bundled voice of the language
+and convert the vocal into the timbre of the uploaded audio. LocalAI always requires an uploaded audio, so a bundled
+voice ignores it. `params[sample_rate]` resamples the output (24000 Hz by default).
 """
 
 import gc
+import glob
 import json
 import os
 import sys
@@ -62,6 +63,11 @@ class BackendServicer(backend_pb2_grpc.BackendServicer):
 
     def LoadModel(self, request, context):
         model_dir = os.path.dirname(request.ModelFile or os.path.join(request.ModelPath, request.Model))
+        # Voices the gallery installs next to the model: voices/<name>.wav with its metadata in voices/<name>.json.
+        for meta in glob.glob(os.path.join(model_dir, "voices", "*.json")):
+            wav = meta[: -len(".json")] + ".wav"
+            if os.path.exists(wav):
+                VOICES[os.path.basename(meta)[: -len(".json")]] = Voice(wav, meta)
         os.environ["SOULX_WHISPER"] = os.path.join(model_dir, "whisper-base")
         try:
             self.singer = Singer(model_dir, code_dir)
