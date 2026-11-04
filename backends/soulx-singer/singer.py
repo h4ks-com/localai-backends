@@ -25,6 +25,10 @@ MAX_VOICE_SECONDS = 20
 MIN_VOICED_FRAMES = 2
 PHRASE_GAP_SECONDS = 0.15
 SNAP_LIMIT_SEMITONES = 2.0
+LENGTH_TOLERANCE = 0.03
+LONG_NOTE_SECONDS = 0.7
+IN_TUNE_SEMITONES = 0.35
+SPLICE_SECONDS = 0.025
 FADE_IN_SECONDS = 0.01
 FADE_OUT_SECONDS = 0.04
 PEAK_LEVEL = 0.89
@@ -64,6 +68,36 @@ def phrases(notes: list[ScoreNote]) -> list[list[ScoreNote]]:
         else:
             groups.append([note])
     return groups
+
+
+def keep_long_notes(fitted: np.ndarray, raw: np.ndarray, notes: list[ScoreNote]) -> np.ndarray:
+    """Puts SoulX-Singer's own audio back on long held notes it already sang in tune. WORLD's resynthesis keeps short
+    notes on pitch but crackles on a sustained vowel, so a held note it did not need to fix sounds better untouched."""
+    signal = raw.astype(np.float64)
+    f0, times = pyworld.dio(signal, SAMPLE_RATE, frame_period=FRAME_PERIOD_MS)
+    mixed = fitted[: len(raw)].copy()
+    edge = int(SAMPLE_RATE * SPLICE_SECONDS)
+    for note in notes:
+        if note.length < LONG_NOTE_SECONDS:
+            continue
+        inside = (times >= note.start) & (times < note.start + note.length) & (f0 > 0)
+        if inside.sum() < MIN_VOICED_FRAMES:
+            continue
+        if abs(12 * np.log2(np.median(f0[inside]) / midi_to_hz(note.pitch))) > IN_TUNE_SEMITONES:
+            continue
+        begin, end = int(note.start * SAMPLE_RATE), min(len(raw), int((note.start + note.length) * SAMPLE_RATE))
+        if end - begin <= 2 * edge:
+            continue
+        weight = np.ones(end - begin, dtype=np.float32)
+        weight[:edge] = np.linspace(0, 1, edge, dtype=np.float32)
+        weight[-edge:] = np.linspace(1, 0, edge, dtype=np.float32)
+        mixed[begin:end] = mixed[begin:end] * (1 - weight) + raw[begin:end] * weight
+    return mixed
+
+
+def as_long_as(audio: np.ndarray, seconds: float) -> np.ndarray:
+    length = int(seconds * SAMPLE_RATE)
+    return np.pad(audio, (0, max(0, length - len(audio))))[:length].astype(np.float32)
 
 
 def fit_to_score(audio: np.ndarray, seconds: float, notes: list[ScoreNote], snap: bool) -> np.ndarray:
@@ -157,7 +191,11 @@ class Singer:
                     for note in line
                     if begin <= note.start - offset < finish
                 ]
-                fitted = fade_edges(fit_to_score(sung.squeeze().float().cpu().numpy(), finish - begin, inside, snap))
+                rendered = sung.squeeze().float().cpu().numpy()
+                fitted = fit_to_score(rendered, finish - begin, inside, snap)
+                if abs(len(rendered) / SAMPLE_RATE - (finish - begin)) <= (finish - begin) * LENGTH_TOLERANCE:
+                    fitted = keep_long_notes(fitted, as_long_as(rendered, finish - begin), inside)
+                fitted = fade_edges(as_long_as(fitted, finish - begin))
                 start = int((offset + begin) * SAMPLE_RATE)
                 length = min(len(fitted), len(audio) - start)
                 audio[start : start + length] = fitted[:length]
