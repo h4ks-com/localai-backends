@@ -39,6 +39,10 @@ TAKES = 3
 CLICK_RATIO = 6
 CLICK_FLOOR = 0.01
 CRACK_DB = 9
+GAP_DB = 25
+GAP_SECONDS = 0.1
+ONSET_DB = 30
+MAX_ENTRY_SHIFT_SECONDS = 0.2
 LEGAL_ONSETS = {
     "B L",
     "B R",
@@ -163,7 +167,31 @@ def glitches(audio: np.ndarray, notes: list[ScoreNote]) -> int:
             )
         ]
         cracks += int((np.diff(held) < -CRACK_DB).sum())
-    return int((np.diff(spikes) == 1).sum()) + 2 * cracks
+    return int((np.diff(spikes) == 1).sum()) + 2 * cracks + 3 * gaps(level, notes)
+
+
+def gaps(level: np.ndarray, notes: list[ScoreNote]) -> int:
+    """Counts notes the singer drops out on for a moment, as when "the radio" came out as "the ... radio"."""
+    voiced = level[level > level.max() - 40]
+    floor = (np.median(voiced) if len(voiced) else level.max()) - GAP_DB
+    run = round(GAP_SECONDS * 1000 / FRAME_PERIOD_MS)
+    count = 0
+    for note in notes:
+        first = int((note.start + 0.05) * 1000 / FRAME_PERIOD_MS)
+        last = int((note.start + note.length - 0.05) * 1000 / FRAME_PERIOD_MS)
+        inside = level[first:last]
+        if len(inside) >= run:
+            quiet = np.convolve((inside < floor).astype(int), np.ones(run, dtype=int), mode="valid")
+            count += int(quiet.max() >= run)
+    return count
+
+
+def voice_onset(audio: np.ndarray) -> float:
+    """Seconds from the start of a rendered line to the singer's first sound."""
+    hop = int(0.002 * SAMPLE_RATE)
+    head = audio[:SAMPLE_RATE]
+    level = 20 * np.log10(np.sqrt(np.convolve(head**2, np.ones(hop) / hop, mode="same")[::hop]) + 1e-9)
+    return float(np.argmax(level > level.max() - ONSET_DB)) * hop / SAMPLE_RATE
 
 
 def keep_long_notes(fitted: np.ndarray, raw: np.ndarray, notes: list[ScoreNote]) -> np.ndarray:
@@ -303,6 +331,10 @@ class Singer:
                 ]
                 takes = [self.take(prompt, split_words(segment), seed, inside, snap) for seed in range(TAKES)]
                 fitted = min(takes, key=lambda audio: glitches(audio, inside))
+                # SoulX-Singer starts a line 50 to 120 ms after its first note, so we move the line up to sing on
+                # the beat, and the fade-in then softens the singer's first sound rather than the silence before it.
+                late = min(MAX_ENTRY_SHIFT_SECONDS, voice_onset(fitted))
+                fitted = fade_edges(fitted[int(late * SAMPLE_RATE) :])
                 start = int((offset + begin) * SAMPLE_RATE)
                 length = min(len(fitted), len(audio) - start)
                 audio[start : start + length] = fitted[:length]
@@ -327,7 +359,7 @@ class Singer:
         fitted = fit_to_score(rendered, seconds, notes, snap)
         if abs(len(rendered) / SAMPLE_RATE - seconds) <= seconds * LENGTH_TOLERANCE:
             fitted = keep_long_notes(fitted, as_long_as(rendered, seconds), notes)
-        return fade_edges(as_long_as(fitted, seconds))
+        return as_long_as(fitted, seconds)
 
     @staticmethod
     def segments(line: list[ScoreNote], offset: float, language: str) -> list[dict]:
