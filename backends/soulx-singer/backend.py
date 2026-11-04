@@ -23,7 +23,7 @@ import librosa
 import soundfile
 import torch
 from grpc_server import run
-from singer import SAMPLE_RATE, ScoreNote, Singer, Voice, snap_pitch
+from singer import SAMPLE_RATE, ScoreNote, Singer, Voice, fit_to_score
 
 code_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SoulX-Singer")
 
@@ -89,7 +89,7 @@ class BackendServicer(backend_pb2_grpc.BackendServicer):
         if voice == CLIP:
             sung = self.singer.convert(sung, request.audio_path)
             if snap:
-                sung = snap_pitch(sung, notes)
+                sung = fit_to_score(sung, len(sung) / SAMPLE_RATE, notes, True)
         rate = int(params.get("sample_rate", SAMPLE_RATE))
         if rate != SAMPLE_RATE:
             sung = librosa.resample(sung, orig_sr=SAMPLE_RATE, target_sr=rate)

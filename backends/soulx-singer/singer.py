@@ -23,6 +23,8 @@ FRAME_PERIOD_MS = 5.0
 LANGUAGES = {"en": "English", "zh": "Mandarin", "yue": "Cantonese"}
 MAX_VOICE_SECONDS = 20
 MIN_VOICED_FRAMES = 2
+PHRASE_GAP_SECONDS = 0.15
+SNAP_LIMIT_SEMITONES = 2.0
 
 
 @dataclass
@@ -50,22 +52,46 @@ def midi_to_hz(pitch: float) -> float:
     return 440.0 * 2 ** ((pitch - 69) / 12)
 
 
-def snap_pitch(audio: np.ndarray, notes: list[ScoreNote]) -> np.ndarray:
-    """Moves each sung note so its median pitch lands on the score's pitch, keeping the singer's vibrato and slides
-    inside the note, and resynthesises the vocal with WORLD."""
+def phrases(notes: list[ScoreNote]) -> list[list[ScoreNote]]:
+    """Splits the score at every breath, so each sung line is rendered and timed on its own."""
+    groups: list[list[ScoreNote]] = []
+    for note in notes:
+        if groups and note.start - (groups[-1][-1].start + groups[-1][-1].length) < PHRASE_GAP_SECONDS:
+            groups[-1].append(note)
+        else:
+            groups.append([note])
+    return groups
+
+
+def fit_to_score(audio: np.ndarray, seconds: float, notes: list[ScoreNote], snap: bool) -> np.ndarray:
+    """Stretches a rendered stretch of singing to the length the score gives it, so no line drifts off the beat, and
+    with snap moves each note's median pitch onto the score when the singer missed by a little. A bigger miss is a
+    slide or a different note, and forcing it that far strains the voice, so we leave it."""
     signal = audio.astype(np.float64)
     f0, times = pyworld.dio(signal, SAMPLE_RATE, frame_period=FRAME_PERIOD_MS)
     f0 = pyworld.stonemask(signal, f0, times, SAMPLE_RATE)
     envelope = pyworld.cheaptrick(signal, f0, times, SAMPLE_RATE)
     aperiodicity = pyworld.d4c(signal, f0, times, SAMPLE_RATE)
-    corrected = f0.copy()
-    for note in notes:
-        inside = (times >= note.start) & (times < note.start + note.length) & (f0 > 0)
-        if inside.sum() < MIN_VOICED_FRAMES:
-            continue
-        corrected[inside] = f0[inside] * (midi_to_hz(note.pitch) / np.median(f0[inside]))
-    sung = pyworld.synthesize(corrected, envelope, aperiodicity, SAMPLE_RATE, FRAME_PERIOD_MS)
-    return sung[: len(audio)].astype(np.float32)
+    frames = max(2, round(seconds * 1000 / FRAME_PERIOD_MS) + 1)
+    source = np.round(np.linspace(0, len(f0) - 1, frames)).astype(int)
+    f0, envelope, aperiodicity = f0[source].copy(), envelope[source].copy(), aperiodicity[source].copy()
+    if snap:
+        times = np.arange(frames) * FRAME_PERIOD_MS / 1000
+        for note in notes:
+            inside = (times >= note.start) & (times < note.start + note.length) & (f0 > 0)
+            if inside.sum() < MIN_VOICED_FRAMES:
+                continue
+            miss = 12 * np.log2(np.median(f0[inside]) / midi_to_hz(note.pitch))
+            if abs(miss) <= SNAP_LIMIT_SEMITONES:
+                f0[inside] = f0[inside] * 2 ** (-miss / 12)
+    sung = pyworld.synthesize(
+        np.ascontiguousarray(f0),
+        np.ascontiguousarray(envelope),
+        np.ascontiguousarray(aperiodicity),
+        SAMPLE_RATE,
+        FRAME_PERIOD_MS,
+    )
+    return sung[: int(seconds * SAMPLE_RATE)].astype(np.float32)
 
 
 def load_weights(model: torch.nn.Module, path: str, device: str) -> torch.nn.Module:
@@ -91,39 +117,51 @@ class Singer:
     def sing(self, voice: Voice, notes: list[ScoreNote], language: str, snap: bool) -> np.ndarray:
         with open(voice.meta, encoding="utf-8") as handle:
             prompt = self.processor.process(json.load(handle)[0], voice.wav)
+        end = max(note.start + note.length for note in notes)
+        audio = np.zeros(int(end * SAMPLE_RATE) + SAMPLE_RATE // 2, dtype=np.float32)
+        for line in phrases(notes):
+            offset = line[0].start
+            for segment in self.segments(line, offset, language):
+                begin, finish = segment["time"][0] / 1000, segment["time"][1] / 1000
+                with torch.no_grad():
+                    sung = self.model.infer(
+                        {"prompt": prompt, "target": self.processor.process(segment, None)},
+                        auto_shift=False,
+                        pitch_shift=0,
+                        n_steps=self.config.infer.n_steps,
+                        cfg=self.config.infer.cfg,
+                        control="score",
+                        use_fp16=False,
+                    )
+                inside = [
+                    ScoreNote(note.start - offset - begin, note.length, note.pitch, note.word, note.slur)
+                    for note in line
+                    if begin <= note.start - offset < finish
+                ]
+                fitted = fit_to_score(sung.squeeze().float().cpu().numpy(), finish - begin, inside, snap)
+                start = int((offset + begin) * SAMPLE_RATE)
+                length = min(len(fitted), len(audio) - start)
+                audio[start : start + length] = fitted[:length]
+        return audio
+
+    @staticmethod
+    def segments(line: list[ScoreNote], offset: float, language: str) -> list[dict]:
+        """SoulX-Singer's metadata for one line, with times from the line's first note."""
         with tempfile.TemporaryDirectory() as workdir:
             target_path = os.path.join(workdir, "target.json")
             score = [
                 Note(
-                    start_s=note.start,
+                    start_s=note.start - offset,
                     note_dur=note.length,
                     note_text=note.word,
                     note_pitch=note.pitch,
                     note_type=3 if note.slur else 2,
                 )
-                for note in notes
+                for note in line
             ]
             notes2meta(score, target_path, None, LANGUAGES.get(language, "English"), None)
             with open(target_path, encoding="utf-8") as handle:
-                segments = json.load(handle)
-        total = int(segments[-1]["time"][1] / 1000 * SAMPLE_RATE)
-        audio = np.zeros(total, dtype=np.float32)
-        for segment in segments:
-            start = int(segment["time"][0] / 1000 * SAMPLE_RATE)
-            with torch.no_grad():
-                sung = self.model.infer(
-                    {"prompt": prompt, "target": self.processor.process(segment, None)},
-                    auto_shift=False,
-                    pitch_shift=0,
-                    n_steps=self.config.infer.n_steps,
-                    cfg=self.config.infer.cfg,
-                    control="score",
-                    use_fp16=False,
-                )
-            sung = sung.squeeze().float().cpu().numpy()
-            length = min(len(sung), total - start)
-            audio[start : start + length] = sung[:length]
-        return snap_pitch(audio, notes) if snap else audio
+                return json.load(handle)
 
     def convert(self, audio: np.ndarray, voice_clip: str) -> np.ndarray:
         """Re-voices a sung vocal in the timbre of the clip, keeping its pitch and timing."""
