@@ -25,6 +25,9 @@ MAX_VOICE_SECONDS = 20
 MIN_VOICED_FRAMES = 2
 PHRASE_GAP_SECONDS = 0.15
 SNAP_LIMIT_SEMITONES = 2.0
+FADE_IN_SECONDS = 0.01
+FADE_OUT_SECONDS = 0.04
+PEAK_LEVEL = 0.89
 
 
 @dataclass
@@ -94,6 +97,22 @@ def fit_to_score(audio: np.ndarray, seconds: float, notes: list[ScoreNote], snap
     return sung[: int(seconds * SAMPLE_RATE)].astype(np.float32)
 
 
+def fade_edges(audio: np.ndarray) -> np.ndarray:
+    """Fades a rendered line in and out over a few milliseconds, so lines placed side by side never click."""
+    fade_in, fade_out = int(SAMPLE_RATE * FADE_IN_SECONDS), int(SAMPLE_RATE * FADE_OUT_SECONDS)
+    faded = audio.copy()
+    if len(faded) > fade_in + fade_out:
+        faded[:fade_in] *= np.linspace(0, 1, fade_in, dtype=np.float32)
+        faded[-fade_out:] *= np.linspace(1, 0, fade_out, dtype=np.float32)
+    return faded
+
+
+def normalize_peak(audio: np.ndarray) -> np.ndarray:
+    """Scales a whole part so its loudest moment sits just under full scale; held vowels otherwise clip the WAV."""
+    peak = float(np.max(np.abs(audio))) if len(audio) else 0.0
+    return audio * (PEAK_LEVEL / peak) if peak > 0 else audio
+
+
 def load_weights(model: torch.nn.Module, path: str, device: str) -> torch.nn.Module:
     checkpoint = torch.load(path, weights_only=False, map_location="cpu")
     model.load_state_dict(checkpoint["state_dict"], strict=True)
@@ -138,11 +157,11 @@ class Singer:
                     for note in line
                     if begin <= note.start - offset < finish
                 ]
-                fitted = fit_to_score(sung.squeeze().float().cpu().numpy(), finish - begin, inside, snap)
+                fitted = fade_edges(fit_to_score(sung.squeeze().float().cpu().numpy(), finish - begin, inside, snap))
                 start = int((offset + begin) * SAMPLE_RATE)
                 length = min(len(fitted), len(audio) - start)
                 audio[start : start + length] = fitted[:length]
-        return audio
+        return normalize_peak(audio)
 
     @staticmethod
     def segments(line: list[ScoreNote], offset: float, language: str) -> list[dict]:
