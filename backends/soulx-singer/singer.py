@@ -123,6 +123,14 @@ def syllables(phones: list[str]) -> list[list[str]]:
     return [phones[start:end] for start, end in itertools.pairwise(bounds)]
 
 
+def syllables_on(phones: list[str], notes: int) -> list[list[str]]:
+    """A word's syllables for the notes it is sung on; the last note sings every syllable the notes run out for."""
+    parts = syllables(phones)
+    if len(parts) <= notes:
+        return parts
+    return [*parts[: notes - 1], [phone for part in parts[notes - 1 :] for phone in part]]
+
+
 def split_words(segment: dict) -> dict:
     """Gives each note of a word sung over several notes its own syllable. SoulX-Singer reads a word on several notes
     as one word sung on the first note and held over the rest, so "every" on three notes came out as "every-ee-ee"."""
@@ -133,7 +141,7 @@ def split_words(segment: dict) -> dict:
         while last < len(words) and kinds[last] == "3" and words[last] == words[first]:
             last += 1
         if last - first > 1 and phones[first].startswith("en_"):
-            for index, part in enumerate(syllables(phones[first][3:].split("-"))[: last - first]):
+            for index, part in enumerate(syllables_on(phones[first][3:].split("-"), last - first)):
                 phones[first + index] = "en_" + "-".join(part)
                 kinds[first + index] = "2"
         first = last
